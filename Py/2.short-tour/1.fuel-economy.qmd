@@ -11,6 +11,7 @@ from pyprojroot import here
 from io import BytesIO
 from urllib.request import urlopen
 from zipfile import ZipFile
+import pandas as pd
 ```
 
 ```{python}
@@ -33,29 +34,22 @@ def ingest_remote_zips(url_list: list, pth: str):
 
     Returns
     -------
-    fnames (str): Paths to written files.
-
-
+    None
     """
-    fnames = list()
     pth = os.path.normpath(pth)
-    os.makedirs(pth)
-
+    try:
+        os.makedirs(pth)
+    except FileExistsError:
+        pass
     for url in url_list:
         with urlopen(url) as url_resp:
             with ZipFile(BytesIO(url_resp.read()), mode="r") as zipf:
-                for fnm in zipf.namelist():
-                    fnm_clean = fnm.strip().replace(" ", "-")
-                    outpth = os.path.join(pth, fnm_clean)
-                    fnames.append(outpth)
-                    with open(str(outpth), "w") as f:
-                        print(f"Writing to {outpth}")
-                        f.write(fnm)
-                        f.close()
-    return fnames
-
+                for f in zipf.filelist:
+                    zipf.extract(f, pth)
+    return None
 ```
 
 ```{python}
-filepths = ingest_remote_zips(cars_remotes, target_pth)
+# write files to disk
+ingest_remote_zips(cars_remotes, target_pth)
 ```
