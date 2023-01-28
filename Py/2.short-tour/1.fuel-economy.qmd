@@ -1,0 +1,61 @@
+---
+title: "US Fuel Economy Dataset"
+format:
+  html:
+    code-fold: true
+jupyter: python3
+---
+```{python}
+import os
+from pyprojroot import here
+from io import BytesIO
+from urllib.request import urlopen
+from zipfile import ZipFile
+```
+
+```{python}
+cars2010 = "https://www.fueleconomy.gov/feg/epadata/10data.zip"
+cars2011 = "https://www.fueleconomy.gov/feg/epadata/11data.zip"
+cars_remotes = list([cars2010, cars2011])
+target_pth = os.path.join(here(), "..", "data", "cars")
+```
+
+```{python}
+def ingest_remote_zips(url_list: list, pth: str):
+    """
+    Read some remote zipfiles to disk. 
+
+    Parameters
+    ----------
+    url_list: List of urls to attempt read
+
+    pth: Path to write directory.
+
+    Returns
+    -------
+    fnames (str): Paths to written files.
+
+
+    """
+    fnames = list()
+    pth = os.path.normpath(pth)
+    os.makedirs(pth)
+
+    for url in url_list:
+        with urlopen(url) as url_resp:
+            with ZipFile(BytesIO(url_resp.read()), mode="r") as zipf:
+                for fnm in zipf.namelist():
+                    fnm_clean = fnm.strip().replace(" ", "-")
+                    outpth = os.path.join(pth, fnm_clean)
+                    fnames.append(outpth)
+                    with open(str(outpth), "w") as f:
+                        print(f"Writing to {outpth}")
+                        f.write(fnm)
+                        f.close()
+    return fnames
+
+```
+
+```{python}
+filepths = ingest_remote_zips(cars_remotes, target_pth)
+```

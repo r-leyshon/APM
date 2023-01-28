@@ -1,0 +1,4 @@
+nbformat
+nbclient
+ipykernel
+pyprojroot
