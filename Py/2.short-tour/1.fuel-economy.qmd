@@ -7,11 +7,14 @@ jupyter: python3
 ---
 ```{python}
 import os
-from pyprojroot import here
-from io import BytesIO
+import re
 from urllib.request import urlopen
 from zipfile import ZipFile
+
+from pyprojroot import here
+from io import BytesIO
 import pandas as pd
+
 ```
 
 ```{python}
@@ -52,4 +55,19 @@ def ingest_remote_zips(url_list: list, pth: str):
 ```{python}
 # write files to disk
 ingest_remote_zips(cars_remotes, target_pth)
+```
+
+```{python}
+# look in the data folder for cars files
+files = os.listdir(target_pth)
+pat_2010 = re.compile("2010")
+pat_2011 = re.compile("2011")
+filenm_2010 = files[[i for i, f in enumerate(files) if bool(pat_2010.search(f))][0]]
+filenm_2011 = files[[i for i, f in enumerate(files) if bool(pat_2011.search(f))][0]]
+```
+
+```{python}
+# import cars files
+cars_2010 = pd.read_excel(filenm_2010)
+cars_2011 = pd.read_excel(filenm_2011)
 ```

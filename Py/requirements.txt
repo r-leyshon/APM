@@ -3,3 +3,4 @@ nbclient
 ipykernel
 pyprojroot
 pandas
+openpyxl
