@@ -14,8 +14,11 @@ from zipfile import ZipFile
 from pyprojroot import here
 from io import BytesIO
 import pandas as pd
+import missingno as msno
 
 ```
+
+## Ingest Data
 
 ```{python}
 cars2010 = "https://www.fueleconomy.gov/feg/epadata/10data.zip"
@@ -71,3 +74,59 @@ filenm_2011 = files[[i for i, f in enumerate(files) if bool(pat_2011.search(f))]
 cars_2010 = pd.read_excel(filenm_2010)
 cars_2011 = pd.read_excel(filenm_2011)
 ```
+
+***
+
+## EDA
+
+```{python}
+msno.matrix(cars_2010)
+```
+
+```{python}
+msno.matrix(cars_2011)
+```
+
+Missingness within certain cols in each set. Check missingness in cols specified in chapter - MPG & displacement.
+
+MPG will assumed to be `Comb Unadj FE - Conventional Fuel`
+
+
+```{python}
+keep_cols = ["Model Yr", "Comb Unadj FE - Conventional Fuel", "Eng Displ"]
+disp_2010 = cars_2010.loc[:, keep_cols].copy(deep=True)
+disp_2011 = cars_2011.loc[:, keep_cols].copy(deep=True)
+# append dfs
+cars_2010_11 = pd.concat([disp_2010, disp_2011]).reset_index(drop=True)
+cars_2010_11.isna().sum()
+```
+
+Full complement for these dimensions.
+18 vehicles have had their mpgs removed following alegations that manufacturers falsified their emissions data. These should be removed.
+
+```{python}
+
+mod_mask = [val != "Mod" for val in cars_2010_11.mpg_combined]
+print(f"{len(cars_2010_11)} rows prior to filter")
+cars_2010_11 = cars_2010_11[mod_mask]
+print(f"{len(cars_2010_11)} following filter")
+```
+
+
+```{python}
+cars_2010_11 = cars_2010_11.rename(
+    {
+        "Model Yr": "year",
+        "Comb Unadj FE - Conventional Fuel": "mpg_combined",
+        "Eng Displ": "disp"
+        ""
+    }, axis=1)
+# mpg is object, coerce to float
+cars_2010_11.mpg_combined = pd.to_numeric(cars_2010_11.mpg_combined)
+cars_2010_11.dtypes
+```
+
+
+
+
+

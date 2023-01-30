@@ -4,3 +4,4 @@ ipykernel
 pyprojroot
 pandas
 openpyxl
+missingno
