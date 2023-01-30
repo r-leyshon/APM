@@ -127,6 +127,12 @@ cars_2010_11.dtypes
 ```
 
 
+***
 
+## Visualise
 
+```{python}
+for title, group in cars_2010_11.groupby("year"):
+    group.plot(x="disp", y="mpg_combined", title=f"{title} Model Year", ls="none", marker="o")
 
+```
