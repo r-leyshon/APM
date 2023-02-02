@@ -15,6 +15,9 @@ from pyprojroot import here
 from io import BytesIO
 import pandas as pd
 import missingno as msno
+from sklearn.linear_model import LinearRegression
+import numpy as np
+import matplotlib.pyplot as plt
 
 ```
 
@@ -135,4 +138,47 @@ cars_2010_11.dtypes
 for title, group in cars_2010_11.groupby("year"):
     group.plot(x="disp", y="mpg_combined", title=f"{title} Model Year", ls="none", marker="o")
 
+```
+
+## Linear Regression
+
+```{python}
+X_train = np.array(cars_2010_11.query("year == 2010").loc[:, "disp"]).reshape((-1, 1))
+y_train = np.array(cars_2010_11.query("year == 2010").loc[:, "mpg_combined"])
+
+```
+
+```{python}
+mod = LinearRegression()
+mod.fit(X_train, y_train)
+print(f"coefficient of determination: {mod.score(X_train, y_train)}")
+print(f"interept: {mod.intercept_}")
+print(f"slope: {mod.coef_}")
+
+```
+
+```{python}
+X_test = np.array(cars_2010_11.query("year == 2011").loc[:, "disp"]).reshape((-1, 1))
+y_test = np.array(cars_2010_11.query("year == 2011").loc[:, "mpg_combined"])
+y_pred = mod.predict(X_test)
+```
+
+
+```{python}
+plt.scatter(X_train, y_train, color="#5A5A5A", alpha=0.3) 
+plt.plot(X_test, y_pred, color="red")
+plt.xlabel("Engine Displacement")
+plt.ylabel("Fuel Economy")
+plt.show()
+```
+
+```{python}
+plt.clf()
+plt.scatter(y_train, np.random.choice(y_pred, size=len(y_train), replace=False), color="#5A5A5A", alpha=0.3) 
+#plt.plot(X_test, y_pred, color="red")
+plt.xlabel("Observed")
+plt.ylabel("Predicted")
+plt.axline((0, 0.5), slope=0.5, color="black", linestyle=(0, (5, 5)))
+
+plt.show()
 ```

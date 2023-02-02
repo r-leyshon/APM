@@ -5,3 +5,5 @@ pyprojroot
 pandas
 openpyxl
 missingno
+scikit-learn
+numpy
